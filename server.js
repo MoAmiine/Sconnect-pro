@@ -6,6 +6,7 @@ const finalhandler = require('finalhandler');
 
 const router = require('./src/core/router');
 const { render } = require('./src/core/renderer');
+const pool = require('./src/config/db');
 
 const serve = serveStatic(path.join(__dirname, 'public'));
 
