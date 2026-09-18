@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Infrastructures</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Infrastructures municipales</h1>
+
+  <h2><%= editingFacility ? "Modifier" : "Ajouter" %> une infrastructure</h2>
+  <form method="POST" action="<%= editingFacility ? '/facilities/' + editingFacility.id + '/update' : '/facilities' %>">
+    <label>Nom : <input type="text" name="name" value="<%= editingFacility ? editingFacility.name : '' %>" required></label><br>
+    <label>Type : <input type="text" name="type" value="<%= editingFacility ? editingFacility.type : '' %>" required></label><br>
+    <label>Adresse : <input type="text" name="address" value="<%= editingFacility && editingFacility.address ? editingFacility.address : '' %>"></label><br>
+    <label>Capacité ERP : <input type="number" name="erp_capacity" value="<%= editingFacility ? editingFacility.erp_capacity : '' %>" required></label><br>
+    <label>Divisible : <input type="checkbox" name="is_divisible" <%= editingFacility && editingFacility.is_divisible ? 'checked' : '' %>></label><br>
+    <button type="submit"><%= editingFacility ? "Mettre à jour" : "Créer" %></button>
+  </form>
+
+  <h2>Liste des infrastructures</h2>
+  <table border="1" cellpadding="6">
+    <tr><th>ID</th><th>Nom</th><th>Type</th><th>Capacité ERP</th><th>Divisible</th><th>Actions</th></tr>
+    <% facilities.forEach(f => { %>
+    <tr>
+      <td><%= f.id %></td>
+      <td><%= f.name %></td>
+      <td><%= f.type %></td>
+      <td><%= f.erp_capacity %></td>
+      <td><%= f.is_divisible ? "Oui" : "Non" %></td>
+      <td>
+        <a href="/facilities/<%= f.id %>/edit">Modifier</a>
+        <form method="POST" action="/facilities/<%= f.id %>/delete" style="display:inline">
+          <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+</body>
+</html>
