@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Associations</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Associations partenaires</h1>
+
+  <h2><%= editingAssociation ? "Modifier" : "Ajouter" %> une association</h2>
+  <form method="POST" action="<%= editingAssociation ? '/associations/' + editingAssociation.id + '/update' : '/associations' %>">
+    <label>Nom : <input type="text" name="name" value="<%= editingAssociation ? editingAssociation.name : '' %>" required></label><br>
+    <label>Email : <input type="email" name="contact_email" value="<%= editingAssociation && editingAssociation.contact_email ? editingAssociation.contact_email : '' %>"></label><br>
+    <label>Téléphone : <input type="text" name="contact_phone" value="<%= editingAssociation && editingAssociation.contact_phone ? editingAssociation.contact_phone : '' %>"></label><br>
+    <button type="submit"><%= editingAssociation ? "Mettre à jour" : "Créer" %></button>
+  </form>
+
+  <h2>Liste des associations</h2>
+  <table border="1" cellpadding="6">
+    <tr><th>ID</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Actions</th></tr>
+    <% associations.forEach(a => { %>
+    <tr>
+      <td><%= a.id %></td>
+      <td><%= a.name %></td>
+      <td><%= a.contact_email %></td>
+      <td><%= a.contact_phone %></td>
+      <td>
+        <a href="/associations/<%= a.id %>/edit">Modifier</a>
+        <form method="POST" action="/associations/<%= a.id %>/delete" style="display:inline">
+          <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+</body>
+</html>
