@@ -10,6 +10,7 @@ const { render } = require('./src/core/renderer');
 const pool = require('./src/config/db');
 const facilityController = require('./src/controllers/facilityController');
 const associationController = require('./src/controllers/associationController');
+const activityController = require('./src/controllers/activityController');
 
 const serve = serveStatic(path.join(__dirname, 'public'));
 const parseFormBody = bodyParser.urlencoded({ extended: false });
@@ -29,6 +30,10 @@ router.on('GET', '/associations/:id/edit', associationController.showEditForm);
 router.on('POST', '/associations', associationController.createAssociation);
 router.on('POST', '/associations/:id/update', associationController.updateAssociation);
 router.on('POST', '/associations/:id/delete', associationController.deleteAssociation);
+
+router.on('GET', '/activities', activityController.listActivities);
+router.on('POST', '/activities', activityController.createActivity);
+router.on('POST', '/activities/:id/delete', activityController.deleteActivity);
 
 
 const server = http.createServer((req, res) => {
