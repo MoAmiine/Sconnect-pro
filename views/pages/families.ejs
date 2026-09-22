@@ -1,36 +1,46 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Familles</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-  <h1>Foyers fiscaux (familles)</h1>
+<%- include('../partials/header', { title: 'Familles', active: 'families' }) %>
 
-  <h2><%= editingFamily ? "Modifier" : "Ajouter" %> une famille</h2>
-  <form method="POST" action="<%= editingFamily ? '/families/' + editingFamily.id + '/update' : '/families' %>">
-    <label>Nom du foyer : <input type="text" name="name" value="<%= editingFamily ? editingFamily.name : '' %>" required></label><br>
-    <label>Quotient familial (€) : <input type="number" step="0.01" name="quotient_familial" value="<%= editingFamily ? editingFamily.quotient_familial : '' %>" required></label><br>
-    <button type="submit"><%= editingFamily ? "Mettre à jour" : "Créer" %></button>
+<h1>Foyers fiscaux</h1>
+<p class="lede">Le quotient familial détermine la bourse municipale (Règle 1C).</p>
+
+<%- include('../partials/alerts') %>
+
+<div class="panel">
+  <h2><%= editingFamily ? "Modifier la famille" : "Ajouter une famille" %></h2>
+  <form method="POST" action="<%= editingFamily ? '/families/' + editingFamily.id + '/update' : '/families' %>" class="form-grid">
+    <label>Nom du foyer
+      <input type="text" name="name" value="<%= editingFamily ? editingFamily.name : '' %>" required>
+    </label>
+    <label>Quotient familial (€)
+      <input type="number" step="0.01" name="quotient_familial" value="<%= editingFamily ? editingFamily.quotient_familial : '' %>" required>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%= editingFamily ? "Mettre à jour" : "Créer" %></button>
+      <% if (editingFamily) { %><a href="/families" class="btn btn-ghost">Annuler</a><% } %>
+    </div>
   </form>
+</div>
 
+<div class="panel">
   <h2>Liste des familles</h2>
-  <table border="1" cellpadding="6">
-    <tr><th>ID</th><th>Nom</th><th>QF</th><th>Actions</th></tr>
-    <% families.forEach(f => { %>
-    <tr>
-      <td><%= f.id %></td>
-      <td><%= f.name %></td>
-      <td><%= f.quotient_familial %> €</td>
-      <td>
-        <a href="/families/<%= f.id %>/edit">Modifier</a>
-        <form method="POST" action="/families/<%= f.id %>/delete" style="display:inline">
-          <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
-        </form>
-      </td>
-    </tr>
-    <% }) %>
+  <table class="data-table">
+    <thead><tr><th>Nom</th><th class="num">Quotient familial</th><th></th></tr></thead>
+    <tbody>
+      <% families.forEach(f => { %>
+      <tr>
+        <td><%= f.name %></td>
+        <td class="num"><%= f.quotient_familial %> €</td>
+        <td class="actions">
+          <a href="/families/<%= f.id %>/edit">Modifier</a>
+          <form method="POST" action="/families/<%= f.id %>/delete">
+            <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+      <% if (families.length === 0) { %><tr><td colspan="3" class="empty">Aucune famille enregistrée.</td></tr><% } %>
+    </tbody>
   </table>
-</body>
-</html>
+</div>
+
+<%- include('../partials/footer') %>
