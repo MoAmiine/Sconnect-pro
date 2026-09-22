@@ -1,41 +1,59 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Infrastructures</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-  <h1>Infrastructures municipales</h1>
+<%- include('../partials/header', { title: 'Infrastructures', active: 'facilities' }) %>
 
-  <h2><%= editingFacility ? "Modifier" : "Ajouter" %> une infrastructure</h2>
-  <form method="POST" action="<%= editingFacility ? '/facilities/' + editingFacility.id + '/update' : '/facilities' %>">
-    <label>Nom : <input type="text" name="name" value="<%= editingFacility ? editingFacility.name : '' %>" required></label><br>
-    <label>Type : <input type="text" name="type" value="<%= editingFacility ? editingFacility.type : '' %>" required></label><br>
-    <label>Adresse : <input type="text" name="address" value="<%= editingFacility && editingFacility.address ? editingFacility.address : '' %>"></label><br>
-    <label>Capacité ERP : <input type="number" name="erp_capacity" value="<%= editingFacility ? editingFacility.erp_capacity : '' %>" required></label><br>
-    <label>Divisible : <input type="checkbox" name="is_divisible" <%= editingFacility && editingFacility.is_divisible ? 'checked' : '' %>></label><br>
-    <button type="submit"><%= editingFacility ? "Mettre à jour" : "Créer" %></button>
+<h1>Infrastructures municipales</h1>
+<p class="lede">Gymnases, bassins et dojos mis à disposition des associations.</p>
+
+<%- include('../partials/alerts') %>
+
+<div class="panel">
+  <h2><%= editingFacility ? "Modifier l'infrastructure" : "Ajouter une infrastructure" %></h2>
+  <form method="POST" action="<%= editingFacility ? '/facilities/' + editingFacility.id + '/update' : '/facilities' %>" class="form-grid">
+    <label>Nom
+      <input type="text" name="name" value="<%= editingFacility ? editingFacility.name : '' %>" required>
+    </label>
+    <label>Type
+      <input type="text" name="type" value="<%= editingFacility ? editingFacility.type : '' %>" placeholder="gymnase, bassin, dojo..." required>
+    </label>
+    <label class="wide">Adresse
+      <input type="text" name="address" value="<%= editingFacility && editingFacility.address ? editingFacility.address : '' %>">
+    </label>
+    <label>Capacité ERP
+      <input type="number" name="erp_capacity" value="<%= editingFacility ? editingFacility.erp_capacity : '' %>" required>
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="is_divisible" <%= editingFacility && editingFacility.is_divisible ? 'checked' : '' %>>
+      Infrastructure divisible (demi-terrains)
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%= editingFacility ? "Mettre à jour" : "Créer" %></button>
+      <% if (editingFacility) { %><a href="/facilities" class="btn btn-ghost">Annuler</a><% } %>
+    </div>
   </form>
+</div>
 
+<div class="panel">
   <h2>Liste des infrastructures</h2>
-  <table border="1" cellpadding="6">
-    <tr><th>ID</th><th>Nom</th><th>Type</th><th>Capacité ERP</th><th>Divisible</th><th>Actions</th></tr>
-    <% facilities.forEach(f => { %>
-    <tr>
-      <td><%= f.id %></td>
-      <td><%= f.name %></td>
-      <td><%= f.type %></td>
-      <td><%= f.erp_capacity %></td>
-      <td><%= f.is_divisible ? "Oui" : "Non" %></td>
-      <td>
-        <a href="/facilities/<%= f.id %>/edit">Modifier</a>
-        <form method="POST" action="/facilities/<%= f.id %>/delete" style="display:inline">
-          <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
-        </form>
-      </td>
-    </tr>
-    <% }) %>
+  <table class="data-table">
+    <thead><tr><th>Nom</th><th>Type</th><th>Adresse</th><th class="num">Capacité ERP</th><th>Divisible</th><th></th></tr></thead>
+    <tbody>
+      <% facilities.forEach(f => { %>
+      <tr>
+        <td><%= f.name %></td>
+        <td><%= f.type %></td>
+        <td><%= f.address || '—' %></td>
+        <td class="num"><%= f.erp_capacity %></td>
+        <td><%= f.is_divisible ? "Oui" : "Non" %></td>
+        <td class="actions">
+          <a href="/facilities/<%= f.id %>/edit">Modifier</a>
+          <form method="POST" action="/facilities/<%= f.id %>/delete">
+            <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+      <% if (facilities.length === 0) { %><tr><td colspan="6" class="empty">Aucune infrastructure enregistrée.</td></tr><% } %>
+    </tbody>
   </table>
-</body>
-</html>
+</div>
+
+<%- include('../partials/footer') %>

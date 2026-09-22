@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title><%= title %></title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-  <h1><%= title %></h1>
-  <p>Le serveur HTTP natif fonctionne</p>
-</body>
-</html>
+<%- include('../partials/header', { title: 'Tableau de bord', active: 'dashboard' }) %>
+
+<h1>Tableau de bord</h1>
+<p class="lede">Vue d'ensemble du parc sportif municipal et des inscriptions en cours.</p>
+
+<div class="panel">
+  <h2>Bienvenue</h2>
+  <p>Utilise le menu à gauche pour gérer les infrastructures, associations, activités, adhérents et familles.</p>
+</div>
+
+<%- include('../partials/footer') %>
