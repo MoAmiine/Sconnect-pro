@@ -12,6 +12,7 @@ const facilityController = require('./src/controllers/facilityController');
 const associationController = require('./src/controllers/associationController');
 const activityController = require('./src/controllers/activityController');
 const memberController = require('./src/controllers/memberController');
+const familyController = require('./src/controllers/familyController');
 
 const serve = serveStatic(path.join(__dirname, 'public'));
 const parseFormBody = bodyParser.urlencoded({ extended: false });
@@ -40,6 +41,12 @@ router.on('POST', '/activities/:id/delete', activityController.deleteActivity);
 router.on('GET', '/members', memberController.listMembers);
 router.on('POST', '/members', memberController.createMember);
 router.on('POST', '/members/:id/delete', memberController.deleteMember);
+
+router.on('GET', '/families', familyController.listFamilies);
+router.on('GET', '/families/:id/edit', familyController.showEditForm);
+router.on('POST', '/families', familyController.createFamily);
+router.on('POST', '/families/:id/update', familyController.updateFamily);
+router.on('POST', '/families/:id/delete', familyController.deleteFamily);
 
 
 const server = http.createServer((req, res) => {
