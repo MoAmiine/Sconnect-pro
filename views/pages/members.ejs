@@ -1,44 +1,53 @@
-<%- include('../partials/header', { title: 'Familles', active: 'families' }) %>
+<%- include('../partials/header', { title: 'Adhérents', active: 'members' }) %>
 
-<h1>Foyers fiscaux</h1>
-<p class="lede">Le quotient familial détermine la bourse municipale (Règle 1C).</p>
+<h1>Registre des adhérents</h1>
+<p class="lede">Catégorie d'âge et conformité médicale calculées automatiquement.</p>
 
 <%- include('../partials/alerts') %>
 
 <div class="panel">
-  <h2><%= editingFamily ? "Modifier la famille" : "Ajouter une famille" %></h2>
-  <form method="POST" action="<%= editingFamily ? '/families/' + editingFamily.id + '/update' : '/families' %>" class="form-grid">
-    <label>Nom du foyer
-      <input type="text" name="name" value="<%= editingFamily ? editingFamily.name : '' %>" required>
+  <h2>Ajouter un adhérent</h2>
+  <form method="POST" action="/members" class="form-grid">
+    <label>Prénom<input type="text" name="first_name" required></label>
+    <label>Nom<input type="text" name="last_name" required></label>
+    <label>Date de naissance<input type="date" name="birth_date" required></label>
+    <label>Famille (foyer)
+      <select name="family_id">
+        <option value="">— Aucune —</option>
+        <% families.forEach(f => { %><option value="<%= f.id %>"><%= f.name %></option><% }) %>
+      </select>
     </label>
-    <label>Quotient familial (€)
-      <input type="number" step="0.01" name="quotient_familial" value="<%= editingFamily ? editingFamily.quotient_familial : '' %>" required>
-    </label>
+    <label class="checkbox"><input type="checkbox" name="is_resident"> Résident communal</label>
+    <label>Date du certificat médical<input type="date" name="medical_certificate_date"></label>
+    <label>Sport pratiqué<input type="text" name="sport_type" placeholder="pour valider le certificat"></label>
+    <label>Code Pass'Sport<input type="text" name="pass_sport_code"></label>
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary"><%= editingFamily ? "Mettre à jour" : "Créer" %></button>
-      <% if (editingFamily) { %><a href="/families" class="btn btn-ghost">Annuler</a><% } %>
+      <button type="submit" class="btn btn-primary">Créer</button>
     </div>
   </form>
 </div>
 
 <div class="panel">
-  <h2>Liste des familles</h2>
+  <h2>Liste des adhérents</h2>
   <table class="data-table">
-    <thead><tr><th>Nom</th><th class="num">Quotient familial</th><th></th></tr></thead>
+    <thead><tr><th>Nom</th><th>Naissance</th><th>Catégorie</th><th>Famille</th><th>Résident</th><th>Statut médical</th><th></th></tr></thead>
     <tbody>
-      <% families.forEach(f => { %>
+      <% members.forEach(m => { %>
       <tr>
-        <td><%= f.name %></td>
-        <td class="num"><%= f.quotient_familial %> €</td>
+        <td><%= m.first_name %> <%= m.last_name %></td>
+        <td><%= m.birth_date.toISOString().split('T')[0] %></td>
+        <td><%= m.age_category %></td>
+        <td><%= m.family_name || '—' %></td>
+        <td><%= m.is_resident ? "Oui" : "Non" %></td>
+        <td><span class="badge <%= m.medical_status === 'medical_non_compliant' ? 'badge-danger' : 'badge-ok' %>"><%= m.medical_status %></span></td>
         <td class="actions">
-          <a href="/families/<%= f.id %>/edit">Modifier</a>
-          <form method="POST" action="/families/<%= f.id %>/delete">
+          <form method="POST" action="/members/<%= m.id %>/delete">
             <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
           </form>
         </td>
       </tr>
       <% }) %>
-      <% if (families.length === 0) { %><tr><td colspan="3" class="empty">Aucune famille enregistrée.</td></tr><% } %>
+      <% if (members.length === 0) { %><tr><td colspan="7" class="empty">Aucun adhérent enregistré.</td></tr><% } %>
     </tbody>
   </table>
 </div>
