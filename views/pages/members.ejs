@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Adhérents</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Registre des adhérents</h1>
+
+  <h2>Ajouter un adhérent</h2>
+  <form method="POST" action="/members">
+    <label>Prénom : <input type="text" name="first_name" required></label><br>
+    <label>Nom : <input type="text" name="last_name" required></label><br>
+    <label>Date de naissance : <input type="date" name="birth_date" required></label><br>
+
+    <label>Famille (foyer) :
+      <select name="family_id">
+        <option value="">-- Aucune --</option>
+        <% families.forEach(f => { %>
+          <option value="<%= f.id %>"><%= f.name %></option>
+        <% }) %>
+      </select>
+    </label><br>
+
+    <label>Résident : <input type="checkbox" name="is_resident"></label><br>
+    <label>Date du certificat médical : <input type="date" name="medical_certificate_date"></label><br>
+    <label>Sport pratiqué (pour valider le certificat) : <input type="text" name="sport_type" placeholder="ex: Natation, Boxe..."></label><br>
+    <label>Code Pass'Sport : <input type="text" name="pass_sport_code"></label><br>
+
+    <button type="submit">Créer</button>
+  </form>
+
+  <h2>Liste des adhérents</h2>
+  <table border="1" cellpadding="6">
+    <tr><th>Nom</th><th>Naissance</th><th>Catégorie</th><th>Famille</th><th>Résident</th><th>Statut médical</th><th>Actions</th></tr>
+    <% members.forEach(m => { %>
+    <tr>
+      <td><%= m.first_name %> <%= m.last_name %></td>
+      <td><%= m.birth_date.toISOString().split('T')[0] %></td>
+      <td><%= m.age_category %></td>
+      <td><%= m.family_name || '-' %></td>
+      <td><%= m.is_resident ? "Oui" : "Non" %></td>
+      <td style="color: <%= m.medical_status === 'medical_non_compliant' ? 'red' : 'green' %>">
+        <%= m.medical_status %>
+      </td>
+      <td>
+        <form method="POST" action="/members/<%= m.id %>/delete" style="display:inline">
+          <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+</body>
+</html>
