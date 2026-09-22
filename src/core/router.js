@@ -1,9 +1,9 @@
 const FindMyWay = require('find-my-way');
+const { renderError } = require('./renderer');
 
 const router = FindMyWay({
   defaultRoute: (req, res) => {
-    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end('<h1>404 - Page non trouvée</h1>');
+    renderError(res, 404, "Cette page n'existe pas.");
   }
 });
 
