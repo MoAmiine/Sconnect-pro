@@ -7,6 +7,8 @@ const QF_DISCOUNT_LOW = 0.40;
 const QF_DISCOUNT_MID = 0.20;
 const PASS_SPORT_DEDUCTION = 50.00;
 const FLOOR_PRICE = 15.00;
+const pool = require('../config/db');
+
 
 
 
@@ -47,4 +49,40 @@ function computeInstallments(finalPrice) {
   return [installment1, installment2, installment3];
 }
 
-module.exports = { computeInitialPrice, applyFamilyDiscount, applySocialDiscount, applyPassSport, computeInstallments };
+async function getFamilyRegistrationRank(familyId, dbClient = pool) {
+  if (!familyId) return 0;
+  const result = await dbClient.query(
+    `SELECT COUNT(*) AS total
+     FROM registrations r
+     JOIN members m ON m.id = r.member_id
+     WHERE m.family_id = $1 AND r.status = 'confirmed'
+       AND date_part('year', r.created_at) = date_part('year', CURRENT_DATE)`,
+    [familyId]
+  );
+  return parseInt(result.rows[0].total, 10);
+}
+
+async function calculatePrice({ basePrice, isResident, familyId, quotientFamilial, hasPassSport }, dbClient = pool) {
+  const step1 = computeInitialPrice(parseFloat(basePrice), isResident);
+
+  const rank = await getFamilyRegistrationRank(familyId, dbClient);
+  const step2 = applyFamilyDiscount(step1, rank);
+
+  const step3 = applySocialDiscount(step2.price, parseFloat(quotientFamilial));
+
+  const finalPrice = applyPassSport(step3.price, hasPassSport);
+
+  return {
+    basePrice: parseFloat(basePrice),
+    initialPrice: step1,
+    familyDiscountRate: step2.rate,
+    afterFamilyDiscount: step2.price,
+    socialDiscountRate: step3.rate,
+    afterSocialDiscount: step3.price,
+    passSportApplied: hasPassSport,
+    finalPrice,
+    installments: computeInstallments(finalPrice)
+  };
+}
+
+module.exports = {computeInitialPrice, applyFamilyDiscount, applySocialDiscount, applyPassSport, computeInstallments, getFamilyRegistrationRank, calculatePrice};
