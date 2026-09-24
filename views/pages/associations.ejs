@@ -1,52 +1,36 @@
-<%- include('../partials/header', { title: 'Associations', active: 'associations' }) %>
-
-<h1>Associations partenaires</h1>
-<p class="lede">Les clubs qui organisent des activités dans les infrastructures municipales.</p>
+<%- include('../partials/header', { title: 'Associations', active: 'associations', heroTitle: 'Associations partenaires', heroText: "Les clubs qui organisent des activités dans les infrastructures municipales." }) %>
 
 <%- include('../partials/alerts') %>
 
-<div class="panel">
-  <h2><%= editingAssociation ? "Modifier l'association" : "Ajouter une association" %></h2>
+<details class="panel">
+  <summary><%= editingAssociation ? "Modifier l'association" : "Ajouter une association" %></summary>
   <form method="POST" action="<%= editingAssociation ? '/associations/' + editingAssociation.id + '/update' : '/associations' %>" class="form-grid">
-    <label class="wide">Nom
-      <input type="text" name="name" value="<%= editingAssociation ? editingAssociation.name : '' %>" required>
-    </label>
-    <label>Email
-      <input type="email" name="contact_email" value="<%= editingAssociation && editingAssociation.contact_email ? editingAssociation.contact_email : '' %>">
-    </label>
-    <label>Téléphone
-      <input type="text" name="contact_phone" value="<%= editingAssociation && editingAssociation.contact_phone ? editingAssociation.contact_phone : '' %>">
-    </label>
+    <label class="wide">Nom<input type="text" name="name" value="<%= editingAssociation ? editingAssociation.name : '' %>" required></label>
+    <label>Email<input type="email" name="contact_email" value="<%= editingAssociation && editingAssociation.contact_email ? editingAssociation.contact_email : '' %>"></label>
+    <label>Téléphone<input type="text" name="contact_phone" value="<%= editingAssociation && editingAssociation.contact_phone ? editingAssociation.contact_phone : '' %>"></label>
     <div class="form-actions">
       <button type="submit" class="btn btn-primary"><%= editingAssociation ? "Mettre à jour" : "Créer" %></button>
       <% if (editingAssociation) { %><a href="/associations" class="btn btn-ghost">Annuler</a><% } %>
     </div>
   </form>
-</div>
+</details>
 
-<div class="panel">
-  <h2>Liste des associations</h2>
-  <table class="data-table">
-    <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th></th></tr></thead>
-    <tbody>
-      <% associations.forEach(a => { %>
-      <tr>
-        <td><%= a.name %></td>
-        <td><%= a.contact_email || '—' %></td>
-        <td><%= a.contact_phone || '—' %></td>
-        <td class="actions">
-          <a href="/associations/<%= a.id %>/edit">Modifier</a>
-          <form method="POST" action="/associations/<%= a.id %>/delete">
-            <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
-          </form>
-        </td>
-      </tr>
-      <% }) %>
-      <% if (associations.length === 0) { %><tr><td colspan="4" class="empty">Aucune association enregistrée.</td></tr><% } %>
-    </tbody>
-  </table>
+<div class="card-grid">
+  <% associations.forEach(a => { %>
+  <div class="card">
+    <span class="card-tag">Club</span>
+    <h3><%= a.name %></h3>
+    <p class="meta"><%= a.contact_email || '—' %></p>
+    <p class="meta"><%= a.contact_phone || '—' %></p>
+    <div class="card-actions">
+      <a href="/associations/<%= a.id %>/edit">Modifier</a>
+      <form method="POST" action="/associations/<%= a.id %>/delete">
+        <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
+      </form>
+    </div>
+  </div>
+  <% }) %>
+  <% if (associations.length === 0) { %><p class="lede">Aucune association enregistrée.</p><% } %>
 </div>
 
 <%- include('../partials/footer') %>
-
-  

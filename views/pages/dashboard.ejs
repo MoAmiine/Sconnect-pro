@@ -1,11 +1,31 @@
-<%- include('../partials/header', { title: 'Tableau de bord', active: 'dashboard' }) %>
+<%- include('../partials/header', { title: 'Tableau de bord', active: 'dashboard', heroTitle: 'SportConnect Pro', heroText: "La plateforme de gestion du parc sportif municipal : 12 complexes, plus de 40 associations partenaires et plus de 6 000 usagers chaque saison." }) %>
 
-<h1>Tableau de bord</h1>
-<p class="lede">Vue d'ensemble du parc sportif municipal et des inscriptions en cours.</p>
-
-<div class="panel">
-  <h2>Bienvenue</h2>
-  <p>Utilise le menu à gauche pour gérer les infrastructures, associations, activités, adhérents et familles.</p>
+<div class="card-grid">
+  <a href="/facilities" class="card">
+    <span class="card-tag">Parc sportif</span>
+    <h3>Infrastructures</h3>
+    <p class="meta">Gymnases, bassins, dojos et leur jauge de sécurité ERP.</p>
+  </a>
+  <a href="/associations" class="card">
+    <span class="card-tag">Partenaires</span>
+    <h3>Associations</h3>
+    <p class="meta">Les clubs qui organisent des activités dans les infrastructures.</p>
+  </a>
+  <a href="/activities" class="card">
+    <span class="card-tag">Catalogue</span>
+    <h3>Activités</h3>
+    <p class="meta">Créneaux, horaires et inscriptions.</p>
+  </a>
+  <a href="/members" class="card">
+    <span class="card-tag">Registre</span>
+    <h3>Adhérents</h3>
+    <p class="meta">Catégorie d'âge et conformité médicale calculées automatiquement.</p>
+  </a>
+  <a href="/families" class="card">
+    <span class="card-tag">Foyers</span>
+    <h3>Familles</h3>
+    <p class="meta">Quotient familial et dégressivité fratrie.</p>
+  </a>
 </div>
 
 <%- include('../partials/footer') %>

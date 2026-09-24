@@ -1,0 +1,36 @@
+<%- include('../partials/header', { title: "Devis", active: 'activities', heroTitle: "Devis d'inscription", heroText: member.first_name + ' ' + member.last_name + ' — ' + activity.name }) %>
+
+<div class="panel">
+  <h2>Détail du calcul</h2>
+  <table class="data-table">
+    <tbody>
+      <tr><td>Tarif de base</td><td class="num"><%= quote.basePrice.toFixed(2) %> €</td></tr>
+      <tr><td>Après statut résident/extérieur</td><td class="num"><%= quote.initialPrice.toFixed(2) %> €</td></tr>
+      <tr><td>Dégressivité familiale (-<%= (quote.familyDiscountRate*100).toFixed(0) %>%)</td><td class="num"><%= quote.afterFamilyDiscount.toFixed(2) %> €</td></tr>
+      <tr><td>Réduction quotient familial (-<%= (quote.socialDiscountRate*100).toFixed(0) %>%)</td><td class="num"><%= quote.afterSocialDiscount.toFixed(2) %> €</td></tr>
+      <tr><td>Pass'Sport<%= quote.passSportApplied ? '' : ' (non appliqué)' %></td><td class="num"><%= quote.passSportApplied ? '-50.00 €' : '—' %></td></tr>
+      <tr><td><strong>Total à payer</strong></td><td class="num"><strong><%= quote.finalPrice.toFixed(2) %> €</strong></td></tr>
+    </tbody>
+  </table>
+
+  <% if (paymentPlan === 'installments_3') { %>
+  <h2 style="margin-top:24px;">Échéancier (3 fois)</h2>
+  <table class="data-table">
+    <tbody>
+      <tr><td>Échéance 1 (aujourd'hui)</td><td class="num"><%= quote.installments[0].toFixed(2) %> €</td></tr>
+      <tr><td>Échéance 2 (+30 jours)</td><td class="num"><%= quote.installments[1].toFixed(2) %> €</td></tr>
+      <tr><td>Échéance 3 (+60 jours)</td><td class="num"><%= quote.installments[2].toFixed(2) %> €</td></tr>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<form method="POST" action="/registrations" class="form-actions">
+  <input type="hidden" name="activity_id" value="<%= activity.id %>">
+  <input type="hidden" name="member_id" value="<%= member.id %>">
+  <input type="hidden" name="payment_plan" value="<%= paymentPlan %>">
+  <button type="submit" class="btn btn-accent">Confirmer l'inscription</button>
+  <a href="/activities/<%= activity.id %>" class="btn btn-ghost">Annuler</a>
+</form>
+
+<%- include('../partials/footer') %>

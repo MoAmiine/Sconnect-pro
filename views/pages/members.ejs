@@ -1,34 +1,25 @@
-<%- include('../partials/header', { title: 'Adhérents', active: 'members' }) %>
-
-<h1>Registre des adhérents</h1>
-<p class="lede">Catégorie d'âge et conformité médicale calculées automatiquement.</p>
+<%- include('../partials/header', { title: 'Adhérents', active: 'members', heroTitle: 'Registre des adhérents', heroText: "Catégorie d'âge et conformité médicale calculées automatiquement." }) %>
 
 <%- include('../partials/alerts') %>
 
-<div class="panel">
-  <h2>Ajouter un adhérent</h2>
+<details class="panel">
+  <summary>Ajouter un adhérent</summary>
   <form method="POST" action="/members" class="form-grid">
     <label>Prénom<input type="text" name="first_name" required></label>
     <label>Nom<input type="text" name="last_name" required></label>
     <label>Date de naissance<input type="date" name="birth_date" required></label>
     <label>Famille (foyer)
-      <select name="family_id">
-        <option value="">— Aucune —</option>
-        <% families.forEach(f => { %><option value="<%= f.id %>"><%= f.name %></option><% }) %>
-      </select>
+      <select name="family_id"><option value="">— Aucune —</option><% families.forEach(f => { %><option value="<%= f.id %>"><%= f.name %></option><% }) %></select>
     </label>
     <label class="checkbox"><input type="checkbox" name="is_resident"> Résident communal</label>
     <label>Date du certificat médical<input type="date" name="medical_certificate_date"></label>
     <label>Sport pratiqué<input type="text" name="sport_type" placeholder="pour valider le certificat"></label>
     <label>Code Pass'Sport<input type="text" name="pass_sport_code"></label>
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Créer</button>
-    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">Créer</button></div>
   </form>
-</div>
+</details>
 
 <div class="panel">
-  <h2>Liste des adhérents</h2>
   <table class="data-table">
     <thead><tr><th>Nom</th><th>Naissance</th><th>Catégorie</th><th>Famille</th><th>Résident</th><th>Statut médical</th><th></th></tr></thead>
     <tbody>
@@ -41,9 +32,7 @@
         <td><%= m.is_resident ? "Oui" : "Non" %></td>
         <td><span class="badge <%= m.medical_status === 'medical_non_compliant' ? 'badge-danger' : 'badge-ok' %>"><%= m.medical_status %></span></td>
         <td class="actions">
-          <form method="POST" action="/members/<%= m.id %>/delete">
-            <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
-          </form>
+          <form method="POST" action="/members/<%= m.id %>/delete"><button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button></form>
         </td>
       </tr>
       <% }) %>

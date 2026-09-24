@@ -1,0 +1,32 @@
+<%- include('../partials/header', { title: activity.name, active: 'activities', heroTitle: activity.name, heroText: activity.association_name + ' · ' + activity.facility_name }) %>
+
+<%- include('../partials/alerts') %>
+
+<div class="panel">
+  <h2>Détails du créneau</h2>
+  <table class="data-table">
+    <tbody>
+      <tr><td>Sport</td><td><%= activity.sport_type %></td></tr>
+      <tr><td>Catégorie d'âge</td><td><%= activity.age_category %></td></tr>
+      <tr><td>Horaire</td><td><%= activity.start_time %>–<%= activity.end_time %></td></tr>
+      <tr><td>Tarif de base</td><td class="num"><%= activity.base_price %> €</td></tr>
+      <tr><td>Places</td><td class="num"><%= confirmedCount %> / <%= activity.max_capacity %></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <h2>Inscrire un adhérent</h2>
+  <form method="POST" action="/registrations/quote" class="form-grid">
+    <input type="hidden" name="activity_id" value="<%= activity.id %>">
+    <label class="wide">Adhérent
+      <select name="member_id" required><% members.forEach(m => { %><option value="<%= m.id %>"><%= m.first_name %> <%= m.last_name %></option><% }) %></select>
+    </label>
+    <label>Mode de paiement
+      <select name="payment_plan"><option value="full">Comptant (1 fois)</option><option value="installments_3">3 fois sans frais</option></select>
+    </label>
+    <div class="form-actions"><button type="submit" class="btn btn-accent">Voir le devis</button></div>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>
