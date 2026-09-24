@@ -40,5 +40,11 @@ function applyPassSport(price, hasPassSport) {
   return Math.round(result * 100) / 100;
 }
 
+function computeInstallments(finalPrice) {
+  const installment2 = Math.round(finalPrice * 0.30 * 100) / 100;
+  const installment3 = Math.round(finalPrice * 0.30 * 100) / 100;
+  const installment1 = Math.round((finalPrice - installment2 - installment3) * 100) / 100;
+  return [installment1, installment2, installment3];
+}
 
-module.exports = { computeInitialPrice, applyFamilyDiscount, applySocialDiscount, applyPassSport };
+module.exports = { computeInitialPrice, applyFamilyDiscount, applySocialDiscount, applyPassSport, computeInstallments };
