@@ -1,38 +1,93 @@
-<%- include('../partials/header', { title: 'Infrastructures', active: 'facilities', heroTitle: 'Infrastructures municipales', heroText: "Gymnases, bassins et dojos mis à disposition des associations partenaires." }) %>
+<%- include('../partials/header', { 
+  title: 'Infrastructures', 
+  active: 'facilities', 
+  heroTitle: 'Parc des Équipements Sportifs', 
+  heroText: "Gymnases, complexes aquatiques et dojos municipaux soumis aux jauges de sécurité ERP." 
+}) %>
 
 <%- include('../partials/alerts') %>
 
-<details class="panel">
-  <summary><%= editingFacility ? "Modifier l'infrastructure" : "Ajouter une infrastructure" %></summary>
+<!-- Formulaire d'ajout / modification -->
+<details class="panel" <%= editingFacility ? 'open' : '' %>>
+  <summary>
+    <span><%= editingFacility ? "✏️ Modifier l'infrastructure : " + editingFacility.name : "➕ Déclarer une nouvelle infrastructure" %></span>
+    <span class="summary-badge">Réglementation incendie ERP</span>
+  </summary>
   <form method="POST" action="<%= editingFacility ? '/facilities/' + editingFacility.id + '/update' : '/facilities' %>" class="form-grid">
-    <label>Nom<input type="text" name="name" value="<%= editingFacility ? editingFacility.name : '' %>" required></label>
-    <label>Type<input type="text" name="type" value="<%= editingFacility ? editingFacility.type : '' %>" placeholder="gymnase, bassin, dojo..." required></label>
-    <label class="wide">Adresse<input type="text" name="address" value="<%= editingFacility && editingFacility.address ? editingFacility.address : '' %>"></label>
-    <label>Capacité ERP<input type="number" name="erp_capacity" value="<%= editingFacility ? editingFacility.erp_capacity : '' %>" required></label>
-    <label class="checkbox"><input type="checkbox" name="is_divisible" <%= editingFacility && editingFacility.is_divisible ? 'checked' : '' %>> Infrastructure divisible (demi-terrains)</label>
+    <label>Nom du complexe / salle
+      <input type="text" name="name" value="<%= editingFacility ? editingFacility.name : '' %>" placeholder="Ex: Gymnase Pierre de Coubertin" required>
+    </label>
+    <label>Type d'infrastructure
+      <select name="type" required>
+        <% const types = ['Gymnase omnisports', 'Bassin / Piscine', 'Dojo d\'arts martiaux', 'Terrain d\'athlétisme', 'Court de tennis', 'Autre équipement']; %>
+        <% types.forEach(t => { %>
+          <option value="<%= t %>" <%= (editingFacility && editingFacility.type === t) ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label class="wide">Adresse municipale
+      <input type="text" name="address" value="<%= editingFacility && editingFacility.address ? editingFacility.address : '' %>" placeholder="Ex: 12 avenue des Sports, 75000 Ville">
+    </label>
+    <label>Capacité maximale autorisée (Jauge ERP)
+      <input type="number" min="1" name="erp_capacity" value="<%= editingFacility ? editingFacility.erp_capacity : '' %>" placeholder="Ex: 150" required>
+    </label>
+    <label class="checkbox wide">
+      <input type="checkbox" name="is_divisible" <%= editingFacility && editingFacility.is_divisible ? 'checked' : '' %>>
+      <strong>Infrastructure divisible</strong> (permet d'accueillir des cours simultanés en demi-terrains / sous-zones distinctes)
+    </label>
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary"><%= editingFacility ? "Mettre à jour" : "Créer" %></button>
-      <% if (editingFacility) { %><a href="/facilities" class="btn btn-ghost">Annuler</a><% } %>
+      <button type="submit" class="btn btn-primary">
+        <%= editingFacility ? "Mettre à jour l'infrastructure" : "Enregistrer l'infrastructure" %>
+      </button>
+      <% if (editingFacility) { %>
+        <a href="/facilities" class="btn btn-ghost">Annuler la modification</a>
+      <% } %>
     </div>
   </form>
 </details>
 
+<!-- Grille des infrastructures -->
 <div class="card-grid">
   <% facilities.forEach(f => { %>
   <div class="card">
-    <span class="card-tag"><%= f.type %></span>
+    <div class="card-header-line">
+      <span class="card-tag tag-facility"><%= f.type %></span>
+      <% if (f.is_divisible) { %>
+        <span class="badge badge-info">Divisible</span>
+      <% } %>
+    </div>
+
     <h3><%= f.name %></h3>
-    <p class="meta"><%= f.address || 'Adresse non renseignée' %></p>
-    <p class="meta">Capacité ERP : <strong><%= f.erp_capacity %></strong><% if (f.is_divisible) { %> · divisible<% } %></p>
+    
+    <p class="meta">
+      <span>📍</span>
+      <%= f.address || 'Adresse non renseignée' %>
+    </p>
+
+    <p class="meta">
+      <span>🛡️</span>
+      Jauge ERP légale : <strong><%= f.erp_capacity %> personnes max</strong>
+    </p>
+
     <div class="card-actions">
-      <a href="/facilities/<%= f.id %>/edit">Modifier</a>
+      <a href="/facilities/<%= f.id %>/edit" class="btn-link-edit">
+        ✏️ Modifier
+      </a>
       <form method="POST" action="/facilities/<%= f.id %>/delete">
-        <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
+        <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer cette infrastructure ? (Attention aux activités associées)')">
+          🗑️ Supprimer
+        </button>
       </form>
     </div>
   </div>
   <% }) %>
-  <% if (facilities.length === 0) { %><p class="lede">Aucune infrastructure enregistrée pour le moment.</p><% } %>
+
+  <% if (facilities.length === 0) { %>
+    <div class="panel" style="grid-column: 1 / -1; text-align:center; padding:48px 20px;">
+      <p style="font-size:18px; font-weight:600; color:var(--muted); margin:0 0 10px;">Aucune infrastructure enregistrée</p>
+      <p class="meta" style="justify-content:center;">Utilisez le formulaire pour déclarer un premier équipement sportif.</p>
+    </div>
+  <% } %>
 </div>
 
 <%- include('../partials/footer') %>

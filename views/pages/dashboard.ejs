@@ -1,31 +1,101 @@
-<%- include('../partials/header', { title: 'Tableau de bord', active: 'dashboard', heroTitle: 'SportConnect Pro', heroText: "La plateforme de gestion du parc sportif municipal : 12 complexes, plus de 40 associations partenaires et plus de 6 000 usagers chaque saison." }) %>
+<%- include('../partials/header', { 
+  title: 'Tableau de bord', 
+  active: 'dashboard', 
+  heroTitle: 'Plateforme Sportive & Associative', 
+  heroText: "Supervision du parc métropolitain : 12 complexes sportifs, 40+ associations conventionnées et gestion des inscriptions en flux tendu." 
+}) %>
 
-<div class="card-grid">
-  <a href="/facilities" class="card">
-    <span class="card-tag">Parc sportif</span>
-    <h3>Infrastructures</h3>
-    <p class="meta">Gymnases, bassins, dojos et leur jauge de sécurité ERP.</p>
-  </a>
-  <a href="/associations" class="card">
-    <span class="card-tag">Partenaires</span>
-    <h3>Associations</h3>
-    <p class="meta">Les clubs qui organisent des activités dans les infrastructures.</p>
-  </a>
-  <a href="/activities" class="card">
-    <span class="card-tag">Catalogue</span>
-    <h3>Activités</h3>
-    <p class="meta">Créneaux, horaires et inscriptions.</p>
-  </a>
-  <a href="/members" class="card">
-    <span class="card-tag">Registre</span>
-    <h3>Adhérents</h3>
-    <p class="meta">Catégorie d'âge et conformité médicale calculées automatiquement.</p>
-  </a>
-  <a href="/families" class="card">
-    <span class="card-tag">Foyers</span>
-    <h3>Familles</h3>
-    <p class="meta">Quotient familial et dégressivité fratrie.</p>
-  </a>
+<%- include('../partials/alerts') %>
+
+<!-- Grille de KPI Métropolitains -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <span class="kpi-label">Équipements ERP</span>
+    <span class="kpi-value">12</span>
+    <span class="kpi-sub">Gymnases, bassins, dojos</span>
+  </div>
+  <div class="kpi-card">
+    <span class="kpi-label">Clubs Conventionnés</span>
+    <span class="kpi-value">40+</span>
+    <span class="kpi-sub">Associations partenaires</span>
+  </div>
+  <div class="kpi-card">
+    <span class="kpi-label">Capacité Saisonnière</span>
+    <span class="kpi-value">6 000+</span>
+    <span class="kpi-sub">Usagers métropolitains</span>
+  </div>
+  <div class="kpi-card">
+    <span class="kpi-label">Sécurité Inscriptions</span>
+    <span class="kpi-value">ACID</span>
+    <span class="kpi-sub">Verrous FOR UPDATE anti-surbooking</span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2><span class="icon">🏆</span> Modules de Gestion Sportive</h2>
+  </div>
+  <div class="card-grid" style="margin-bottom:0;">
+    <a href="/facilities" class="card">
+      <div class="card-header-line">
+        <span class="card-tag tag-facility">Équipements</span>
+        <span class="badge badge-info">Jauges ERP</span>
+      </div>
+      <h3>Infrastructures</h3>
+      <p class="meta">Gestion des salles, jauges incendie strictes et divisibilité des terrains.</p>
+      <div class="card-actions">
+        <span>Gérer les salles &rarr;</span>
+      </div>
+    </a>
+
+    <a href="/associations" class="card">
+      <div class="card-header-line">
+        <span class="card-tag">Partenaires</span>
+        <span class="badge badge-ok">Conventionnées</span>
+      </div>
+      <h3>Associations</h3>
+      <p class="meta">Clubs résidents délégataires et organisateurs des activités municipales.</p>
+      <div class="card-actions">
+        <span>Voir les associations &rarr;</span>
+      </div>
+    </a>
+
+    <a href="/activities" class="card">
+      <div class="card-header-line">
+        <span class="card-tag">Planning</span>
+        <span class="badge badge-gold">Anti-collision</span>
+      </div>
+      <h3>Activités & Créneaux</h3>
+      <p class="meta">Catalogue complet, contrôles des créneaux horaires et inscriptions en direct.</p>
+      <div class="card-actions">
+        <span>Ouvrir le catalogue &rarr;</span>
+      </div>
+    </a>
+
+    <a href="/members" class="card">
+      <div class="card-header-line">
+        <span class="card-tag">Licenciés</span>
+        <span class="badge badge-ok">Médical & Âge</span>
+      </div>
+      <h3>Registre Adhérents</h3>
+      <p class="meta">Calcul automatique des catégories officielles au 31/12 et conformité des certificats.</p>
+      <div class="card-actions">
+        <span>Consulter le registre &rarr;</span>
+      </div>
+    </a>
+
+    <a href="/families" class="card">
+      <div class="card-header-line">
+        <span class="card-tag">Solidarité</span>
+        <span class="badge badge-warning">QF & Fratrie</span>
+      </div>
+      <h3>Foyers & Familles</h3>
+      <p class="meta">Quotients familiaux pour bourse municipale et dégressivité fratrie (-15%, -30%).</p>
+      <div class="card-actions">
+        <span>Gérer les foyers &rarr;</span>
+      </div>
+    </a>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>

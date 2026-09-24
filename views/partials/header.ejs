@@ -5,15 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= title %> — SportConnect Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <%- include('navbar', { active: active }) %>
+
 <section class="hero">
   <div class="hero-inner">
-    <h1><%= heroTitle || title %></h1>
-    <% if (typeof heroText !== 'undefined' && heroText) { %><p><%= heroText %></p><% } %>
+    <div class="hero-content">
+      <span class="hero-badge">⚡ Direction des Sports & Vie Associative</span>
+      <h1><%= typeof heroTitle !== 'undefined' && heroTitle ? heroTitle : title %></h1>
+      <% if (typeof heroText !== 'undefined' && heroText) { %>
+        <p><%= heroText %></p>
+      <% } %>
+    </div>
   </div>
 </section>
+
 <main class="site-main">

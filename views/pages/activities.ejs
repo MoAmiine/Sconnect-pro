@@ -1,51 +1,138 @@
-<%- include('../partials/header', { title: 'Activités', active: 'activities', heroTitle: "Catalogue d'activités", heroText: "Créneaux planifiés dans les infrastructures municipales." }) %>
+<%- include('../partials/header', { 
+  title: 'Activités', 
+  active: 'activities', 
+  heroTitle: "Catalogue des Activités Sportives", 
+  heroText: "Créneaux d'entraînement homologués, tarifs subventionnés et gestion des places en temps réel." 
+}) %>
 
 <%- include('../partials/alerts') %>
 
+<!-- Formulaire d'ajout repliable avec accordéon stylisé -->
 <details class="panel">
-  <summary>Ajouter une activité</summary>
+  <summary>
+    <span>➕ Programmer une nouvelle activité</span>
+    <span class="summary-badge">Contrôle anti-collision & jauge ERP automatique</span>
+  </summary>
   <form method="POST" action="/activities" class="form-grid">
-    <label class="wide">Nom<input type="text" name="name" required></label>
-    <label>Association
-      <select name="association_id" required><% associations.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select>
+    <label class="wide">Intitulé du cours / activité
+      <input type="text" name="name" placeholder="Ex: École de Natation Perfectionnement" required>
     </label>
-    <label>Infrastructure
-      <select name="facility_id" required><% facilities.forEach(f => { %><option value="<%= f.id %>"><%= f.name %> (ERP <%= f.erp_capacity %>)</option><% }) %></select>
+    <label>Association organisatrice
+      <select name="association_id" required>
+        <option value="" disabled selected>— Sélectionner un club —</option>
+        <% associations.forEach(a => { %>
+          <option value="<%= a.id %>"><%= a.name %></option>
+        <% }) %>
+      </select>
     </label>
-    <label>Sous-zone (si divisible)<input type="text" name="sub_zone" placeholder="A, B, ou vide"></label>
-    <label>Sport<input type="text" name="sport_type" required placeholder="Natation, Boxe..."></label>
-    <label>Jour
+    <label>Installation sportive
+      <select name="facility_id" required>
+        <option value="" disabled selected>— Sélectionner une salle —</option>
+        <% facilities.forEach(f => { %>
+          <option value="<%= f.id %>"><%= f.name %> (Jauge ERP : <%= f.erp_capacity %> places)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Sous-zone (si équipement divisible)
+      <input type="text" name="sub_zone" placeholder="Ex: Terrain A, Demi-salle Sud (ou vide)">
+    </label>
+    <label>Discipline sportive
+      <input type="text" name="sport_type" placeholder="Ex: Natation, Boxe, Basket..." required>
+    </label>
+    <label>Jour d'entraînement
       <select name="day_of_week" required>
-        <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
-        <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option>
+        <option value="1">Lundi</option>
+        <option value="2">Mardi</option>
+        <option value="3">Mercredi</option>
+        <option value="4">Jeudi</option>
+        <option value="5">Vendredi</option>
+        <option value="6">Samedi</option>
         <option value="0">Dimanche</option>
       </select>
     </label>
-    <label>Heure de début<input type="time" name="start_time" required></label>
-    <label>Heure de fin<input type="time" name="end_time" required></label>
-    <label>Tarif de base (€)<input type="number" step="0.01" name="base_price" required></label>
-    <label>Capacité max<input type="number" name="max_capacity" required></label>
-    <label>Catégorie d'âge<input type="text" name="age_category" required placeholder="senior, benjamin, tous_publics..."></label>
-    <div class="form-actions"><button type="submit" class="btn btn-primary">Créer</button></div>
+    <label>Horaire de début
+      <input type="time" name="start_time" required>
+    </label>
+    <label>Horaire de fin
+      <input type="time" name="end_time" required>
+    </label>
+    <label>Tarif de base annuel (€)
+      <input type="number" step="0.01" min="0" name="base_price" placeholder="Ex: 180.00" required>
+    </label>
+    <label>Capacité maximale du cours
+      <input type="number" min="1" name="max_capacity" placeholder="≤ jauge ERP de la salle" required>
+    </label>
+    <label>Tranche d'âge ciblée
+      <select name="age_category" required>
+        <option value="tous_publics">Tous publics</option>
+        <option value="eveil">Éveil / Baby-Sport (&lt; 6 ans)</option>
+        <option value="poussin">Poussin - U9 (7 à 8 ans)</option>
+        <option value="benjamin">Benjamin - U11 (9 à 10 ans)</option>
+        <option value="minime">Minime - U13 (11 à 12 ans)</option>
+        <option value="cadet">Cadet - U15 (13 à 14 ans)</option>
+        <option value="junior">Junior - U18 (15 à 17 ans)</option>
+        <option value="senior">Senior (18 à 39 ans)</option>
+        <option value="veteran">Vétéran / Master (40 ans et +)</option>
+      </select>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Valider & programmer le créneau</button>
+    </div>
   </form>
 </details>
 
+<!-- Grille des activités -->
 <div class="card-grid">
+  <% const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']; %>
   <% activities.forEach(a => { %>
   <div class="card">
-    <span class="card-tag"><%= a.sport_type %></span>
+    <div class="card-header-line">
+      <span class="card-tag"><%= a.sport_type %></span>
+      <span class="badge badge-gold"><%= Number(a.base_price).toFixed(2) %> € / an</span>
+    </div>
+
     <h3><%= a.name %></h3>
-    <p class="meta"><%= a.facility_name %><% if (a.sub_zone) { %> (<%= a.sub_zone %>)<% } %></p>
-    <p class="meta">Jour <%= a.day_of_week %> · <%= a.start_time %>–<%= a.end_time %> · <%= a.max_capacity %> places</p>
+    
+    <p class="meta">
+      <span>🏛️</span>
+      <strong><%= a.facility_name %></strong>
+      <% if (a.sub_zone) { %><span class="badge badge-info" style="font-size:10px;"><%= a.sub_zone %></span><% } %>
+    </p>
+
+    <p class="meta">
+      <span>📅</span>
+      <%= dayNames[a.day_of_week] %> · <%= a.start_time.slice(0, 5) %> – <%= a.end_time.slice(0, 5) %>
+    </p>
+
+    <p class="meta">
+      <span>🎯</span>
+      Catégorie : <strong><%= a.age_category %></strong>
+    </p>
+
+    <p class="meta">
+      <span>👥</span>
+      Jauge : <strong><%= a.max_capacity %> places max</strong>
+    </p>
+
     <div class="card-actions">
-      <a href="/activities/<%= a.id %>">Voir &amp; inscrire</a>
+      <a href="/activities/<%= a.id %>" class="btn btn-primary btn-sm">
+        Fiche & Inscription &rarr;
+      </a>
       <form method="POST" action="/activities/<%= a.id %>/delete">
-        <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
+        <button type="submit" class="btn-link-danger" onclick="return confirm('Confirmer la suppression de ce créneau ?')">
+          Supprimer
+        </button>
       </form>
     </div>
   </div>
   <% }) %>
-  <% if (activities.length === 0) { %><p class="lede">Aucune activité planifiée.</p><% } %>
+
+  <% if (activities.length === 0) { %>
+    <div class="panel" style="grid-column: 1 / -1; text-align: center; padding: 48px 20px;">
+      <p style="font-size: 18px; font-weight: 600; color: var(--muted); margin: 0 0 10px;">Aucune activité planifiée pour le moment</p>
+      <p class="meta" style="justify-content: center;">Utilisez le formulaire ci-dessus pour planifier un premier créneau sportif.</p>
+    </div>
+  <% } %>
 </div>
 
 <%- include('../partials/footer') %>

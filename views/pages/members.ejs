@@ -1,44 +1,129 @@
-<%- include('../partials/header', { title: 'Adhérents', active: 'members', heroTitle: 'Registre des adhérents', heroText: "Catégorie d'âge et conformité médicale calculées automatiquement." }) %>
+<%- include('../partials/header', { 
+  title: 'Adhérents', 
+  active: 'members', 
+  heroTitle: 'Registre Général des Adhérents', 
+  heroText: "Affiliation fédérale, contrôle automatique de l'âge au 31 décembre et conformité légale des certificats médicaux." 
+}) %>
 
 <%- include('../partials/alerts') %>
 
+<!-- Formulaire d'ajout d'adhérent -->
 <details class="panel">
-  <summary>Ajouter un adhérent</summary>
+  <summary>
+    <span>➕ Enregistrer un nouvel adhérent</span>
+    <span class="summary-badge">Vérification automatique de conformité médicale</span>
+  </summary>
   <form method="POST" action="/members" class="form-grid">
-    <label>Prénom<input type="text" name="first_name" required></label>
-    <label>Nom<input type="text" name="last_name" required></label>
-    <label>Date de naissance<input type="date" name="birth_date" required></label>
-    <label>Famille (foyer)
-      <select name="family_id"><option value="">— Aucune —</option><% families.forEach(f => { %><option value="<%= f.id %>"><%= f.name %></option><% }) %></select>
+    <label>Prénom
+      <input type="text" name="first_name" placeholder="Ex: Lucas" required>
     </label>
-    <label class="checkbox"><input type="checkbox" name="is_resident"> Résident communal</label>
-    <label>Date du certificat médical<input type="date" name="medical_certificate_date"></label>
-    <label>Sport pratiqué<input type="text" name="sport_type" placeholder="pour valider le certificat"></label>
-    <label>Code Pass'Sport<input type="text" name="pass_sport_code"></label>
-    <div class="form-actions"><button type="submit" class="btn btn-primary">Créer</button></div>
+    <label>Nom de famille
+      <input type="text" name="last_name" placeholder="Ex: Martin" required>
+    </label>
+    <label>Date de naissance
+      <input type="date" name="birth_date" required>
+    </label>
+    <label>Foyer fiscal (Famille)
+      <select name="family_id">
+        <option value="">— Aucun foyer rattaché —</option>
+        <% families.forEach(f => { %>
+          <option value="<%= f.id %>"><%= f.name %> (QF: <%= f.quotient_familial %> €)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label class="checkbox wide">
+      <input type="checkbox" name="is_resident">
+      <strong>Résident communal</strong> (donne droit au tarif de base subventionné et bonus de file d'attente)
+    </label>
+    <label>Date d'émission du certificat médical
+      <input type="date" name="medical_certificate_date">
+    </label>
+    <label>Discipline pratiquée
+      <input type="text" name="sport_type" placeholder="Ex: Natation, Rugby, Boxe...">
+    </label>
+    <label class="wide">Code d'aide Pass'Sport (si éligible)
+      <input type="text" name="pass_sport_code" placeholder="Ex: PS-2026-XXXX">
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Créer la fiche adhérent</button>
+    </div>
   </form>
 </details>
 
+<!-- Table des adhérents -->
 <div class="panel">
-  <table class="data-table">
-    <thead><tr><th>Nom</th><th>Naissance</th><th>Catégorie</th><th>Famille</th><th>Résident</th><th>Statut médical</th><th></th></tr></thead>
-    <tbody>
-      <% members.forEach(m => { %>
-      <tr>
-        <td><%= m.first_name %> <%= m.last_name %></td>
-        <td><%= m.birth_date.toISOString().split('T')[0] %></td>
-        <td><%= m.age_category %></td>
-        <td><%= m.family_name || '—' %></td>
-        <td><%= m.is_resident ? "Oui" : "Non" %></td>
-        <td><span class="badge <%= m.medical_status === 'medical_non_compliant' ? 'badge-danger' : 'badge-ok' %>"><%= m.medical_status %></span></td>
-        <td class="actions">
-          <form method="POST" action="/members/<%= m.id %>/delete"><button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button></form>
-        </td>
-      </tr>
-      <% }) %>
-      <% if (members.length === 0) { %><tr><td colspan="7" class="empty">Aucun adhérent enregistré.</td></tr><% } %>
-    </tbody>
-  </table>
+  <div class="panel-header">
+    <h2><span class="icon">🏃</span> Liste des Licenciés & Usagers</h2>
+    <span class="badge badge-info"><%= members.length %> inscrit(s)</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Adhérent</th>
+          <th>Date de Naissance</th>
+          <th>Catégorie Fédérale</th>
+          <th>Foyer / Famille</th>
+          <th>Résidence</th>
+          <th>Statut Médical</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% members.forEach(m => { %>
+        <tr>
+          <td>
+            <strong><%= m.last_name.toUpperCase() %></strong> <%= m.first_name %>
+            <% if (m.pass_sport_code) { %>
+              <div style="font-size:11px; color:var(--gold-dark); font-weight:600;">Pass'Sport : <%= m.pass_sport_code %></div>
+            <% } %>
+          </td>
+          <td class="num">
+            <%= m.birth_date instanceof Date ? m.birth_date.toISOString().split('T')[0] : m.birth_date %>
+          </td>
+          <td>
+            <span class="badge badge-gold"><%= m.age_category || 'Calcul auto' %></span>
+          </td>
+          <td>
+            <%= m.family_name || '—' %>
+          </td>
+          <td>
+            <% if (m.is_resident) { %>
+              <span class="badge badge-ok">Résident</span>
+            <% } else { %>
+              <span class="badge badge-warning">Extérieur</span>
+            <% } %>
+          </td>
+          <td>
+            <% if (m.medical_status === 'medical_non_compliant') { %>
+              <span class="badge badge-danger">
+                <span class="badge-dot"></span> Non conforme (Périmé)
+              </span>
+            <% } else { %>
+              <span class="badge badge-ok">
+                <span class="badge-dot"></span> Conforme
+              </span>
+            <% } %>
+          </td>
+          <td class="actions">
+            <form method="POST" action="/members/<%= m.id %>/delete">
+              <button type="submit" class="btn-link-danger" onclick="return confirm('Confirmer la radiation de cet adhérent ?')">
+                Supprimer
+              </button>
+            </form>
+          </td>
+        </tr>
+        <% }) %>
+
+        <% if (members.length === 0) { %>
+          <tr>
+            <td colspan="7" class="empty">Aucun adhérent enregistré. Utilisez le formulaire ci-dessus pour en ajouter.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>

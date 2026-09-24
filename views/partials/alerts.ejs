@@ -1,6 +1,17 @@
 <% if (typeof error !== 'undefined' && error) { %>
-  <div class="alert alert-danger"><strong>Erreur —</strong> <%= error %></div>
+  <div class="alert alert-danger">
+    <span style="font-size:18px;">⚠️</span>
+    <div>
+      <strong>Attention — </strong> <%= error %>
+    </div>
+  </div>
 <% } %>
+
 <% if (typeof success !== 'undefined' && success) { %>
-  <div class="alert alert-success"><%= success %></div>
+  <div class="alert alert-success">
+    <span style="font-size:18px;">✅</span>
+    <div>
+      <strong>Succès — </strong> <%= success %>
+    </div>
+  </div>
 <% } %>

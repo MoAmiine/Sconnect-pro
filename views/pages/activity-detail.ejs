@@ -1,32 +1,104 @@
-<%- include('../partials/header', { title: activity.name, active: 'activities', heroTitle: activity.name, heroText: activity.association_name + ' · ' + activity.facility_name }) %>
+<%- include('../partials/header', { 
+  title: activity.name, 
+  active: 'activities', 
+  heroTitle: activity.name, 
+  heroText: activity.association_name + ' · Complexe ' + activity.facility_name 
+}) %>
 
 <%- include('../partials/alerts') %>
 
-<div class="panel">
-  <h2>Détails du créneau</h2>
+<% const isFull = confirmedCount >= activity.max_capacity; %>
+<% const percentFilled = Math.min(100, Math.round((confirmedCount / activity.max_capacity) * 100)); %>
+
+<div class="panel" style="border-top: 4px solid var(--stade-mid);">
+  <div class="panel-header">
+    <h2><span class="icon">📋</span> Fiche Technique du Créneau</h2>
+    <div>
+      <% if (isFull) { %>
+        <span class="badge badge-danger">COMPLET</span>
+      <% } else { %>
+        <span class="badge badge-ok"><%= activity.max_capacity - confirmedCount %> place(s) disponible(s)</span>
+      <% } %>
+    </div>
+  </div>
+
   <table class="data-table">
     <tbody>
-      <tr><td>Sport</td><td><%= activity.sport_type %></td></tr>
-      <tr><td>Catégorie d'âge</td><td><%= activity.age_category %></td></tr>
-      <tr><td>Horaire</td><td><%= activity.start_time %>–<%= activity.end_time %></td></tr>
-      <tr><td>Tarif de base</td><td class="num"><%= activity.base_price %> €</td></tr>
-      <tr><td>Places</td><td class="num"><%= confirmedCount %> / <%= activity.max_capacity %></td></tr>
+      <tr>
+        <td><strong>Discipline sportive</strong></td>
+        <td><span class="card-tag"><%= activity.sport_type %></span></td>
+      </tr>
+      <tr>
+        <td><strong>Tranche d'âge autorisée</strong></td>
+        <td><span class="badge badge-info"><%= activity.age_category %></span></td>
+      </tr>
+      <tr>
+        <td><strong>Installation & Emplacement</strong></td>
+        <td><%= activity.facility_name %> <% if (activity.sub_zone) { %>(Zone : <%= activity.sub_zone %>)<% } %></td>
+      </tr>
+      <tr>
+        <td><strong>Horaire hebdomadaire</strong></td>
+        <td><%= activity.start_time.slice(0, 5) %> à <%= activity.end_time.slice(0, 5) %></td>
+      </tr>
+      <tr>
+        <td><strong>Tarif de base annuel</strong></td>
+        <td class="num"><%= Number(activity.base_price).toFixed(2) %> €</td>
+      </tr>
+      <tr>
+        <td><strong>Jauge & Remplissage</strong></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span class="num" style="font-weight:700;"><%= confirmedCount %> / <%= activity.max_capacity %> inscrits</span>
+            <div class="card-meter" style="flex:1; max-width:260px; margin:0;">
+              <div class="card-meter-bar <%= isFull ? 'full' : '' %>" style="width: <%= percentFilled %>%;"></div>
+            </div>
+            <span style="font-size:12px; color:var(--muted);"><%= percentFilled %>%</span>
+          </div>
+        </td>
+      </tr>
     </tbody>
   </table>
 </div>
 
-<div class="panel">
-  <h2>Inscrire un adhérent</h2>
-  <form method="POST" action="/registrations/quote" class="form-grid">
-    <input type="hidden" name="activity_id" value="<%= activity.id %>">
-    <label class="wide">Adhérent
-      <select name="member_id" required><% members.forEach(m => { %><option value="<%= m.id %>"><%= m.first_name %> <%= m.last_name %></option><% }) %></select>
-    </label>
-    <label>Mode de paiement
-      <select name="payment_plan"><option value="full">Comptant (1 fois)</option><option value="installments_3">3 fois sans frais</option></select>
-    </label>
-    <div class="form-actions"><button type="submit" class="btn btn-accent">Voir le devis</button></div>
-  </form>
+<div class="panel" style="border-top: 4px solid var(--gold);">
+  <div class="panel-header">
+    <h2><span class="icon">🎟️</span> Inscrire un Adhérent</h2>
+    <span class="badge badge-gold">Simulation de devis personnalisée</span>
+  </div>
+
+  <% if (members.length === 0) { %>
+    <p class="lede">Aucun adhérent n'est encore enregistré dans le système. <a href="/members" style="color:var(--gold-dark); font-weight:700; text-decoration:underline;">Ajouter un premier adhérent ici</a>.</p>
+  <% } else { %>
+    <form method="POST" action="/registrations/quote" class="form-grid">
+      <input type="hidden" name="activity_id" value="<%= activity.id %>">
+
+      <label class="wide">Sélectionnez l'adhérent
+        <select name="member_id" required>
+          <option value="" disabled selected>— Choisir un usager dans le registre —</option>
+          <% members.forEach(m => { %>
+            <option value="<%= m.id %>">
+              <%= m.last_name.toUpperCase() %> <%= m.first_name %> 
+              (<%= m.is_resident ? 'Résident communal' : 'Extérieur' %>)
+            </option>
+          <% }) %>
+        </select>
+      </label>
+
+      <label class="wide">Option de paiement
+        <select name="payment_plan" required>
+          <option value="full">Règlement comptant (1 fois)</option>
+          <option value="installments_3">Paiement échelonné en 3 fois sans frais (40% / 30% / 30%)</option>
+        </select>
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-accent">
+          <span>⚡</span> Calculer le devis transparent
+        </button>
+        <a href="/activities" class="btn btn-ghost">Retour au catalogue</a>
+      </div>
+    </form>
+  <% } %>
 </div>
 
 <%- include('../partials/footer') %>

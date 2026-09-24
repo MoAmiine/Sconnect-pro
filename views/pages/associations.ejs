@@ -1,36 +1,79 @@
-<%- include('../partials/header', { title: 'Associations', active: 'associations', heroTitle: 'Associations partenaires', heroText: "Les clubs qui organisent des activités dans les infrastructures municipales." }) %>
+<%- include('../partials/header', { 
+  title: 'Associations', 
+  active: 'associations', 
+  heroTitle: 'Clubs & Associations Partenaires', 
+  heroText: "Associations sportives délégataires de service public conventionnées par la métropole." 
+}) %>
 
 <%- include('../partials/alerts') %>
 
-<details class="panel">
-  <summary><%= editingAssociation ? "Modifier l'association" : "Ajouter une association" %></summary>
+<!-- Formulaire d'ajout / modification d'association -->
+<details class="panel" <%= editingAssociation ? 'open' : '' %>>
+  <summary>
+    <span><%= editingAssociation ? "✏️ Modifier le club : " + editingAssociation.name : "➕ Conventionner une nouvelle association" %></span>
+    <span class="summary-badge">Partenariat municipal</span>
+  </summary>
   <form method="POST" action="<%= editingAssociation ? '/associations/' + editingAssociation.id + '/update' : '/associations' %>" class="form-grid">
-    <label class="wide">Nom<input type="text" name="name" value="<%= editingAssociation ? editingAssociation.name : '' %>" required></label>
-    <label>Email<input type="email" name="contact_email" value="<%= editingAssociation && editingAssociation.contact_email ? editingAssociation.contact_email : '' %>"></label>
-    <label>Téléphone<input type="text" name="contact_phone" value="<%= editingAssociation && editingAssociation.contact_phone ? editingAssociation.contact_phone : '' %>"></label>
+    <label class="wide">Nom officiel du club / association
+      <input type="text" name="name" value="<%= editingAssociation ? editingAssociation.name : '' %>" placeholder="Ex: Club Athlétique Métropolitain" required>
+    </label>
+    <label>Email de contact administratif
+      <input type="email" name="contact_email" value="<%= editingAssociation && editingAssociation.contact_email ? editingAssociation.contact_email : '' %>" placeholder="contact@club.org">
+    </label>
+    <label>Numéro de téléphone
+      <input type="text" name="contact_phone" value="<%= editingAssociation && editingAssociation.contact_phone ? editingAssociation.contact_phone : '' %>" placeholder="01 23 45 67 89">
+    </label>
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary"><%= editingAssociation ? "Mettre à jour" : "Créer" %></button>
-      <% if (editingAssociation) { %><a href="/associations" class="btn btn-ghost">Annuler</a><% } %>
+      <button type="submit" class="btn btn-primary">
+        <%= editingAssociation ? "Mettre à jour le club" : "Enregistrer le club" %>
+      </button>
+      <% if (editingAssociation) { %>
+        <a href="/associations" class="btn btn-ghost">Annuler</a>
+      <% } %>
     </div>
   </form>
 </details>
 
+<!-- Grille des associations -->
 <div class="card-grid">
   <% associations.forEach(a => { %>
   <div class="card">
-    <span class="card-tag">Club</span>
+    <div class="card-header-line">
+      <span class="card-tag">Association Loi 1901</span>
+      <span class="badge badge-ok">Conventionnée</span>
+    </div>
+
     <h3><%= a.name %></h3>
-    <p class="meta"><%= a.contact_email || '—' %></p>
-    <p class="meta"><%= a.contact_phone || '—' %></p>
+    
+    <p class="meta">
+      <span>✉️</span>
+      <%= a.contact_email || 'Email non renseigné' %>
+    </p>
+
+    <p class="meta">
+      <span>📞</span>
+      <%= a.contact_phone || 'Téléphone non renseigné' %>
+    </p>
+
     <div class="card-actions">
-      <a href="/associations/<%= a.id %>/edit">Modifier</a>
+      <a href="/associations/<%= a.id %>/edit" class="btn-link-edit">
+        ✏️ Modifier
+      </a>
       <form method="POST" action="/associations/<%= a.id %>/delete">
-        <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ?')">Supprimer</button>
+        <button type="submit" class="btn-link-danger" onclick="return confirm('Supprimer ce club ? (Attention aux activités associées)')">
+          🗑️ Supprimer
+        </button>
       </form>
     </div>
   </div>
   <% }) %>
-  <% if (associations.length === 0) { %><p class="lede">Aucune association enregistrée.</p><% } %>
+
+  <% if (associations.length === 0) { %>
+    <div class="panel" style="grid-column: 1 / -1; text-align:center; padding:48px 20px;">
+      <p style="font-size:18px; font-weight:600; color:var(--muted); margin:0 0 10px;">Aucune association enregistrée</p>
+      <p class="meta" style="justify-content:center;">Utilisez le formulaire pour enregistrer un premier club partenaire.</p>
+    </div>
+  <% } %>
 </div>
 
 <%- include('../partials/footer') %>

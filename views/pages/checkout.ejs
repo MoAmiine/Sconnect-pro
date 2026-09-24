@@ -1,36 +1,148 @@
-<%- include('../partials/header', { title: "Devis", active: 'activities', heroTitle: "Devis d'inscription", heroText: member.first_name + ' ' + member.last_name + ' — ' + activity.name }) %>
+<%- include('../partials/header', { 
+  title: "Devis d'inscription", 
+  active: 'activities', 
+  heroTitle: "Bordereau Tarifaire Officiel", 
+  heroText: "Devis transparent certifié conforme aux règles d'aide sociale et dégressivité de la métropole." 
+}) %>
 
-<div class="panel">
-  <h2>Détail du calcul</h2>
-  <table class="data-table">
-    <tbody>
-      <tr><td>Tarif de base</td><td class="num"><%= quote.basePrice.toFixed(2) %> €</td></tr>
-      <tr><td>Après statut résident/extérieur</td><td class="num"><%= quote.initialPrice.toFixed(2) %> €</td></tr>
-      <tr><td>Dégressivité familiale (-<%= (quote.familyDiscountRate*100).toFixed(0) %>%)</td><td class="num"><%= quote.afterFamilyDiscount.toFixed(2) %> €</td></tr>
-      <tr><td>Réduction quotient familial (-<%= (quote.socialDiscountRate*100).toFixed(0) %>%)</td><td class="num"><%= quote.afterSocialDiscount.toFixed(2) %> €</td></tr>
-      <tr><td>Pass'Sport<%= quote.passSportApplied ? '' : ' (non appliqué)' %></td><td class="num"><%= quote.passSportApplied ? '-50.00 €' : '—' %></td></tr>
-      <tr><td><strong>Total à payer</strong></td><td class="num"><strong><%= quote.finalPrice.toFixed(2) %> €</strong></td></tr>
-    </tbody>
-  </table>
+<div class="ticket-panel">
+  <div class="ticket-header">
+    <div>
+      <h2>Bordereau d'Inscription</h2>
+      <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.8);">Saison en cours · Inscription Métropolitaine</p>
+    </div>
+    <span class="ticket-id">RÈGLES A &rarr; E</span>
+  </div>
 
-  <% if (paymentPlan === 'installments_3') { %>
-  <h2 style="margin-top:24px;">Échéancier (3 fois)</h2>
-  <table class="data-table">
-    <tbody>
-      <tr><td>Échéance 1 (aujourd'hui)</td><td class="num"><%= quote.installments[0].toFixed(2) %> €</td></tr>
-      <tr><td>Échéance 2 (+30 jours)</td><td class="num"><%= quote.installments[1].toFixed(2) %> €</td></tr>
-      <tr><td>Échéance 3 (+60 jours)</td><td class="num"><%= quote.installments[2].toFixed(2) %> €</td></tr>
-    </tbody>
-  </table>
-  <% } %>
+  <div class="ticket-body">
+    <!-- Récapitulatif Adhérent & Activité -->
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase;">Adhérent</div>
+        <div style="font-size:16px; font-weight:800; color:var(--stade-deep);">
+          <%= member.first_name %> <%= member.last_name %>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">
+          <%= member.is_resident ? 'Résident communal' : 'Non-résident (+35%)' %>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase;">Cours réservé</div>
+        <div style="font-size:16px; font-weight:800; color:var(--stade-deep);">
+          <%= activity.name %>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">
+          <%= activity.sport_type %> · <%= activity.facility_name %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grille de décomposition tarifaire -->
+    <div class="table-responsive" style="margin-bottom: 24px; border:none;">
+      <table class="data-table">
+        <tbody>
+          <tr>
+            <td><strong>Tarif de base annuel du club</strong></td>
+            <td class="num"><%= quote.basePrice.toFixed(2) %> €</td>
+          </tr>
+          <tr>
+            <td>
+              Statut de résidence 
+              <% if (!member.is_resident) { %>
+                <span class="badge badge-warning" style="font-size:10.5px;">Majoration ext. +35%</span>
+              <% } else { %>
+                <span class="badge badge-ok" style="font-size:10.5px;">Tarif communal</span>
+              <% } %>
+            </td>
+            <td class="num"><%= quote.initialPrice.toFixed(2) %> €</td>
+          </tr>
+          <tr>
+            <td>
+              Dégressivité familiale (fratrie même foyer)
+              <% if (quote.familyDiscountRate > 0) { %>
+                <span class="badge badge-gold" style="font-size:10.5px;">Remise -<%= (quote.familyDiscountRate * 100).toFixed(0) %>%</span>
+              <% } else { %>
+                <span style="font-size:12px; color:var(--muted);">(1ère inscription : plein tarif)</span>
+              <% } %>
+            </td>
+            <td class="num"><%= quote.afterFamilyDiscount.toFixed(2) %> €</td>
+          </tr>
+          <tr>
+            <td>
+              Bourse municipale (Quotient Familial)
+              <% if (quote.socialDiscountRate > 0) { %>
+                <span class="badge badge-gold" style="font-size:10.5px;">Aide -<%= (quote.socialDiscountRate * 100).toFixed(0) %>%</span>
+              <% } else { %>
+                <span style="font-size:12px; color:var(--muted);">(QF standard / sans réduction)</span>
+              <% } %>
+            </td>
+            <td class="num"><%= quote.afterSocialDiscount.toFixed(2) %> €</td>
+          </tr>
+          <tr>
+            <td>
+              Subvention d'État Pass'Sport
+              <% if (quote.passSportApplied) { %>
+                <span class="badge badge-info" style="font-size:10.5px;">Coupon valide (-50,00 €)</span>
+              <% } else { %>
+                <span style="font-size:12px; color:var(--muted);">(Non applicable)</span>
+              <% } %>
+            </td>
+            <td class="num">
+              <%= quote.passSportApplied ? '-50.00 €' : '—' %>
+            </td>
+          </tr>
+          <tr class="ticket-row-total">
+            <td>
+              <strong>TOTAL DÛ POUR LA SAISON</strong>
+              <div style="font-size:11.5px; font-weight:normal; color:var(--muted);">Garantie de plancher légal à 15,00 € respectée</div>
+            </td>
+            <td class="num" style="font-size:22px;">
+              <%= quote.finalPrice.toFixed(2) %> €
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Échéancier en 3 fois si sélectionné -->
+    <% if (paymentPlan === 'installments_3') { %>
+      <div style="background:var(--silver-soft); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; margin-bottom:24px;">
+        <div style="font-weight:700; color:var(--stade-deep); margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+          <span>📅</span> Échéancier sans frais en 3 mensualités
+        </div>
+        <table class="data-table" style="background:transparent;">
+          <tbody>
+            <tr>
+              <td>Échéance 1 (Jour J — Inscription comptant 40% + centime d'arrondi)</td>
+              <td class="num"><strong><%= quote.installments[0].toFixed(2) %> €</strong></td>
+            </tr>
+            <tr>
+              <td>Échéance 2 (J + 30 jours — 30%)</td>
+              <td class="num"><strong><%= quote.installments[1].toFixed(2) %> €</strong></td>
+            </tr>
+            <tr>
+              <td>Échéance 3 (J + 60 jours — 30%)</td>
+              <td class="num"><strong><%= quote.installments[2].toFixed(2) %> €</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+
+    <!-- Formulaire d'action finale -->
+    <form method="POST" action="/registrations" class="form-actions" style="justify-content:center;">
+      <input type="hidden" name="activity_id" value="<%= activity.id %>">
+      <input type="hidden" name="member_id" value="<%= member.id %>">
+      <input type="hidden" name="payment_plan" value="<%= paymentPlan %>">
+      
+      <button type="submit" class="btn btn-accent" style="padding:14px 32px; font-size:15px;">
+        <span>🔒</span> Confirmer l'inscription (Transaction sécurisée)
+      </button>
+      <a href="/activities/<%= activity.id %>" class="btn btn-ghost">
+        Annuler & Modifier
+      </a>
+    </form>
+  </div>
 </div>
-
-<form method="POST" action="/registrations" class="form-actions">
-  <input type="hidden" name="activity_id" value="<%= activity.id %>">
-  <input type="hidden" name="member_id" value="<%= member.id %>">
-  <input type="hidden" name="payment_plan" value="<%= paymentPlan %>">
-  <button type="submit" class="btn btn-accent">Confirmer l'inscription</button>
-  <a href="/activities/<%= activity.id %>" class="btn btn-ghost">Annuler</a>
-</form>
 
 <%- include('../partials/footer') %>

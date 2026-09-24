@@ -1,14 +1,29 @@
 <header class="topbar">
   <a href="/" class="brand">
     <span class="brand-mark">SC</span>
-    <span class="brand-name">SportConnect <em>Pro</em></span>
+    <div class="brand-text">
+      <span class="brand-name">SportConnect <em>Pro</em></span>
+      <span class="brand-sub">Métropole Sportive</span>
+    </div>
   </a>
   <nav class="topnav">
-    <a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>">Accueil</a>
-    <a href="/facilities" class="<%= active === 'facilities' ? 'active' : '' %>">Infrastructures</a>
-    <a href="/associations" class="<%= active === 'associations' ? 'active' : '' %>">Associations</a>
-    <a href="/activities" class="<%= active === 'activities' ? 'active' : '' %>">Activités</a>
-    <a href="/members" class="<%= active === 'members' ? 'active' : '' %>">Adhérents</a>
-    <a href="/families" class="<%= active === 'families' ? 'active' : '' %>">Familles</a>
+    <a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>">
+      <span>🏟️</span> Accueil
+    </a>
+    <a href="/facilities" class="<%= active === 'facilities' ? 'active' : '' %>">
+      <span>🏛️</span> Infrastructures
+    </a>
+    <a href="/associations" class="<%= active === 'associations' ? 'active' : '' %>">
+      <span>🤝</span> Associations
+    </a>
+    <a href="/activities" class="<%= active === 'activities' ? 'active' : '' %>">
+      <span>⏱️</span> Activités
+    </a>
+    <a href="/members" class="<%= active === 'members' ? 'active' : '' %>">
+      <span>🏃</span> Adhérents
+    </a>
+    <a href="/families" class="<%= active === 'families' ? 'active' : '' %>">
+      <span>👨‍👩‍👧‍👦</span> Familles
+    </a>
   </nav>
 </header>

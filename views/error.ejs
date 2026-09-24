@@ -5,15 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Erreur <%= statusCode %> — SportConnect Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="error-page">
   <div class="error-card">
     <div class="error-code"><%= statusCode %></div>
-    <h1 style="font-family:'Inter'; font-size:20px; margin:0 0 10px;"><%= statusCode === 404 ? "Page introuvable" : "Erreur serveur" %></h1>
-    <p style="color:var(--muted); margin:0 0 20px;"><%= message || "Une erreur est survenue." %></p>
-    <a href="/" class="btn btn-accent">Retour à l'accueil</a>
+    <h1 style="font-family:'Inter', sans-serif; font-size:22px; font-weight:800; color:var(--stade-deep); margin:0 0 10px;">
+      <%= statusCode === 404 ? "Page ou ressource introuvable" : "Incident technique serveur" %>
+    </h1>
+    <p style="color:var(--muted); font-size:15px; margin:0 0 26px; line-height:1.5;">
+      <%= message || "Une erreur inattendue s'est produite lors du traitement de la requête." %>
+    </p>
+    <a href="/" class="btn btn-accent" style="padding:12px 28px;">
+      <span>🏟️</span> Retour au Tableau de Bord
+    </a>
   </div>
 </body>
 </html>
