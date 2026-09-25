@@ -2,6 +2,7 @@ const pool = require('../config/db');
 const { render, renderError } = require('../core/renderer');
 const pricingService = require('../services/pricingService');
 const eligibilityService = require('../services/eligibilityService');
+const waitingListService = require('../services/waitingListService');
 
 async function getActivityWithDetails(activityId, dbClient = pool) {
   const result = await dbClient.query(`
@@ -70,7 +71,6 @@ async function showQuote(req, res) {
       familyQF = famResult.rows.length ? parseFloat(famResult.rows[0].quotient_familial) : 0;
     }
 
-    // Calcul du devis
     const quote = await pricingService.calculatePrice({
       basePrice: activity.base_price,
       isResident: member.is_resident,
@@ -88,7 +88,6 @@ async function showQuote(req, res) {
 
 async function confirmRegistration(req, res) {
   const { activity_id, member_id, payment_plan } = req.body;
-  
   const client = await pool.connect();
 
   try {
@@ -119,16 +118,23 @@ async function confirmRegistration(req, res) {
     );
     const currentCount = parseInt(countRes.rows[0].total, 10);
 
-    if (currentCount >= activity.max_capacity) {
-      await client.query('ROLLBACK');
-      return renderError(res, 400, "Ce cours est complet (capacité maximale atteinte).");
-    }
-
     const memberRes = await client.query('SELECT * FROM members WHERE id = $1', [member_id]);
     const member = memberRes.rows[0];
     if (!member) {
       await client.query('ROLLBACK');
       return renderError(res, 404, "Adhérent introuvable.");
+    }
+
+    if (currentCount >= activity.max_capacity) {
+      await waitingListService.addToWaitingList({
+        activityId: activity_id,
+        memberId: member_id,
+        isResident: member.is_resident
+      }, client);
+
+      await client.query('COMMIT');
+      res.writeHead(302, { Location: '/activities/' + activity_id });
+      return res.end();
     }
 
     let familyQF = 0;
@@ -152,14 +158,13 @@ async function confirmRegistration(req, res) {
     );
 
     await client.query('COMMIT');
-
     res.writeHead(302, { Location: '/activities/' + activity_id });
     res.end();
 
   } catch (err) {
     await client.query('ROLLBACK');
     console.error("Erreur confirmRegistration:", err);
-    renderError(res, 500, "Une erreur est survenue lors de l'enregistrement de l'inscription.");
+    renderError(res, 500, err.message || "Une erreur est survenue lors de l'enregistrement de l'inscription.");
   } finally {
     client.release();
   }
