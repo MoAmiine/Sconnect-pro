@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-const { render } = require('../core/renderer');
+const { render, renderError } = require('../core/renderer');
 
 async function listFacilities(req, res) {
   try {
@@ -7,8 +7,7 @@ async function listFacilities(req, res) {
     render(res, 'facilities', { facilities: result.rows, editingFacility: null });
   } catch (err) {
     console.error(err);
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Erreur serveur');
+    renderError(res, 500, "Impossible de récupérer les infrastructures.");
   }
 }
 
@@ -20,8 +19,7 @@ async function showEditForm(req, res) {
     render(res, 'facilities', { facilities: listResult.rows, editingFacility: editResult.rows[0] });
   } catch (err) {
     console.error(err);
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Erreur serveur');
+    renderError(res, 500, "Impossible de charger cette infrastructure.");
   }
 }
 
@@ -37,8 +35,7 @@ async function createFacility(req, res) {
     res.end();
   } catch (err) {
     console.error(err);
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Erreur serveur');
+    renderError(res, 500, "Impossible d'enregistrer l'infrastructure.");
   }
 }
 
@@ -56,8 +53,7 @@ async function updateFacility(req, res) {
     res.end();
   } catch (err) {
     console.error(err);
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Erreur serveur');
+    renderError(res, 500, "Impossible de mettre à jour l'infrastructure.");
   }
 }
 
@@ -69,8 +65,7 @@ async function deleteFacility(req, res) {
     res.end();
   } catch (err) {
     console.error(err);
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Erreur serveur');
+    renderError(res, 500, "Impossible de supprimer l'infrastructure (vérifiez qu'aucun cours n'y est rattaché).");
   }
 }
 
