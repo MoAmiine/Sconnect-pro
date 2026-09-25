@@ -47,6 +47,7 @@ router.on('POST', '/activities/:id/delete', withParams(activityController.delete
 router.on('GET', '/activities/:id', withParams(registrationController.showActivityDetail));
 router.on('POST', '/registrations/quote', registrationController.showQuote);
 router.on('POST', '/registrations', registrationController.confirmRegistration);
+router.on('POST', '/registrations/:id/cancel', withParams(registrationController.cancelRegistration));
 
 router.on('GET', '/members', memberController.listMembers);
 router.on('POST', '/members', memberController.createMember);

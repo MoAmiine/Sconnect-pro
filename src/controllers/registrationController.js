@@ -21,15 +21,29 @@ async function showActivityDetail(req, res) {
     if (!activity) return renderError(res, 404, "Activité introuvable.");
 
     const membersResult = await pool.query('SELECT * FROM members ORDER BY last_name, first_name');
-    const countResult = await pool.query(
-      `SELECT COUNT(*) AS total FROM registrations WHERE activity_id = $1 AND status = 'confirmed'`,
-      [activity.id]
-    );
+    
+    const registrationsResult = await pool.query(`
+      SELECT r.*, m.first_name, m.last_name
+      FROM registrations r
+      JOIN members m ON m.id = r.member_id
+      WHERE r.activity_id = $1 AND r.status = 'confirmed'
+      ORDER BY r.created_at ASC
+    `, [activity.id]);
+
+    const waitingListResult = await pool.query(`
+      SELECT w.*, m.first_name, m.last_name, m.is_resident
+      FROM waiting_list w
+      JOIN members m ON m.id = w.member_id
+      WHERE w.activity_id = $1 AND w.status IN ('waiting', 'promoted_pending')
+      ORDER BY w.priority_score DESC, w.created_at ASC
+    `, [activity.id]);
 
     render(res, 'activity-detail', {
       activity,
       members: membersResult.rows,
-      confirmedCount: parseInt(countResult.rows[0].total, 10),
+      registrations: registrationsResult.rows,
+      confirmedCount: registrationsResult.rows.length,
+      waitingList: waitingListResult.rows,
       error: null
     });
   } catch (err) {
@@ -60,7 +74,9 @@ async function showQuote(req, res) {
       return render(res, 'activity-detail', {
         activity,
         members: membersResult.rows,
+        registrations: [],
         confirmedCount: parseInt(countResult.rows[0].total, 10),
+        waitingList: [],
         error: `Incompatibilité d'âge : "${member.first_name} ${member.last_name}" est dans la catégorie "${memberCategory}", or ce cours est réservé à la catégorie "${activity.age_category}".`
       });
     }
@@ -170,4 +186,53 @@ async function confirmRegistration(req, res) {
   }
 }
 
-module.exports = { showActivityDetail, showQuote, confirmRegistration };
+async function cancelRegistration(req, res) {
+  const registrationId = req.params.id;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const regRes = await client.query(
+      `SELECT id, activity_id, status FROM registrations WHERE id = $1 FOR UPDATE`,
+      [registrationId]
+    );
+
+    if (regRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return renderError(res, 404, "Inscription introuvable.");
+    }
+
+    const registration = regRes.rows[0];
+
+    if (registration.status === 'cancelled') {
+      await client.query('ROLLBACK');
+      return renderError(res, 400, "Cette inscription est déjà annulée.");
+    }
+
+    await client.query(
+      `UPDATE registrations SET status = 'cancelled' WHERE id = $1`,
+      [registrationId]
+    );
+
+    await waitingListService.promoteNextCandidate(registration.activity_id, client);
+
+    await client.query('COMMIT');
+    res.writeHead(302, { Location: '/activities/' + registration.activity_id });
+    res.end();
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Erreur cancelRegistration:", err);
+    renderError(res, 500, "Erreur lors de l'annulation de l'inscription.");
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = {
+  showActivityDetail,
+  showQuote,
+  confirmRegistration,
+  cancelRegistration
+};
