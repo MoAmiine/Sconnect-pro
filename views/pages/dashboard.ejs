@@ -1,35 +1,77 @@
 <%- include('../partials/header', { 
   title: 'Tableau de bord', 
   active: 'dashboard', 
-  heroTitle: 'Plateforme Sportive & Associative', 
-  heroText: "Supervision du parc métropolitain : 12 complexes sportifs, 40+ associations conventionnées et gestion des inscriptions en flux tendu." 
+  heroTitle: 'Tableau de Bord Métropolitain', 
+  heroText: "Supervision en temps réel des infrastructures, des recettes municipales et du remplissage des créneaux sportifs." 
 }) %>
 
 <%- include('../partials/alerts') %>
 
-<!-- Grille de KPI Métropolitains -->
 <div class="kpi-grid">
   <div class="kpi-card">
-    <span class="kpi-label">Équipements ERP</span>
-    <span class="kpi-value">12</span>
-    <span class="kpi-sub">Gymnases, bassins, dojos</span>
+    <span class="kpi-label">Taux de Remplissage</span>
+    <span class="kpi-value"><%= typeof stats !== 'undefined' ? stats.fillRate : 0 %>%</span>
+    <span class="kpi-sub"><%= typeof stats !== 'undefined' ? stats.totalRegistrations : 0 %> places confirmées</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-label">Clubs Conventionnés</span>
-    <span class="kpi-value">40+</span>
-    <span class="kpi-sub">Associations partenaires</span>
+    <span class="kpi-label">Recettes Saison</span>
+    <span class="kpi-value" style="color:var(--gold-dark);"><%= typeof stats !== 'undefined' ? stats.totalRevenue.toFixed(2) : '0.00' %> €</span>
+    <span class="kpi-sub">Total encaissé / engagé</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-label">Capacité Saisonnière</span>
-    <span class="kpi-value">6 000+</span>
-    <span class="kpi-sub">Usagers métropolitains</span>
+    <span class="kpi-label">En File d'Attente</span>
+    <span class="kpi-value" style="color:var(--info);"><%= typeof stats !== 'undefined' ? stats.totalWaiting : 0 %></span>
+    <span class="kpi-sub">Candidats en attente de place</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-label">Sécurité Inscriptions</span>
-    <span class="kpi-value">ACID</span>
-    <span class="kpi-sub">Verrous FOR UPDATE anti-surbooking</span>
+    <span class="kpi-label">Écosystème Sportif</span>
+    <span class="kpi-value"><%= typeof stats !== 'undefined' ? stats.totalActivities : 0 %></span>
+    <span class="kpi-sub"><%= typeof stats !== 'undefined' ? stats.totalFacilities : 0 %> salles · <%= typeof stats !== 'undefined' ? stats.totalAssociations : 0 %> clubs</span>
   </div>
 </div>
+
+<% if (typeof topActivities !== 'undefined' && topActivities.length > 0) { %>
+<div class="panel" style="margin-bottom:28px;">
+  <div class="panel-header">
+    <h2><span class="icon">🔥</span> Affluence & Tension sur les Créneaux</h2>
+    <span class="badge badge-gold">Activités les plus demandées</span>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Activité</th>
+          <th>Discipline</th>
+          <th>Infrastructure</th>
+          <th>Inscrits / Jauge</th>
+          <th style="text-align:right;">Taux</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% topActivities.forEach(act => { %>
+        <% const count = parseInt(act.confirmed_count, 10) || 0; %>
+        <% const rate = Math.round((count / act.max_capacity) * 100); %>
+        <tr>
+          <td><strong><%= act.name %></strong></td>
+          <td><span class="card-tag"><%= act.sport_type %></span></td>
+          <td><%= act.facility_name %></td>
+          <td class="num"><%= count %> / <%= act.max_capacity %></td>
+          <td style="text-align:right;">
+            <% if (rate >= 100) { %>
+              <span class="badge badge-danger">Complet (100%)</span>
+            <% } else if (rate >= 80) { %>
+              <span class="badge badge-warning"><%= rate %>%</span>
+            <% } else { %>
+              <span class="badge badge-ok"><%= rate %>%</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
 
 <div class="panel">
   <div class="panel-header">
