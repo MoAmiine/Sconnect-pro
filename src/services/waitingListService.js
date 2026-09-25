@@ -46,7 +46,53 @@ async function addToWaitingList({ activityId, memberId, isResident }, dbClient =
   };
 }
 
+async function expireOverduePromotions(activityId, dbClient = pool) {
+  const result = await dbClient.query(
+    `UPDATE waiting_list
+     SET status = 'expired'
+     WHERE activity_id = $1 
+       AND status = 'promoted_pending' 
+       AND deadline_confirmation < NOW()
+     RETURNING id, member_id`,
+    [activityId]
+  );
+  return result.rows;
+}
+
+async function promoteNextCandidate(activityId, dbClient = pool) {
+  await expireOverduePromotions(activityId, dbClient);
+
+  const nextCandidate = await dbClient.query(
+    `SELECT id, member_id, priority_score
+     FROM waiting_list
+     WHERE activity_id = $1 AND status = 'waiting'
+     ORDER BY priority_score DESC, created_at ASC
+     LIMIT 1
+     FOR UPDATE`,
+    [activityId]
+  );
+
+  if (nextCandidate.rows.length === 0) {
+    return null;
+  }
+
+  const candidateId = nextCandidate.rows[0].id;
+
+  const updateResult = await dbClient.query(
+    `UPDATE waiting_list
+     SET status = 'promoted_pending',
+         deadline_confirmation = NOW() + INTERVAL '48 hours'
+     WHERE id = $1
+     RETURNING id, member_id, status, deadline_confirmation`,
+    [candidateId]
+  );
+
+  return updateResult.rows[0];
+}
+
 module.exports = {
   calculatePriorityScore,
-  addToWaitingList
+  addToWaitingList,
+  expireOverduePromotions,
+  promoteNextCandidate
 };
